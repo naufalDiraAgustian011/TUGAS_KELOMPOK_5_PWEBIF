@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+// Verifikasi apakah pengguna sudah login
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +58,8 @@
         </form>
         <!-- Tambahkan tombol logout di sebelah kanan navbar -->
         <a href="logout.php" class="btn btn-outline-danger ml-2">Logout</a>
+        <!-- Tambahkan tautan untuk mengelola akun -->
+        <a href="account_management.php" class="btn btn-outline-primary ml-2">Account Management</a>
     </div>
 </nav>
 
@@ -98,3 +110,4 @@
 
 </body>
 </html>
+
