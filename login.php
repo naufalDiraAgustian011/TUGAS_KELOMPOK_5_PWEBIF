@@ -23,21 +23,27 @@ function test_input($data) {
     return $conn->real_escape_string($data);
 }
 
-// Tambahkan fitur penambahan akun
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
+$login_failed = false;
+
+// Proses login
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
     $username = test_input($_POST["username"]);
     $password = test_input($_POST["password"]);
-    $email = test_input($_POST["email"]);
 
-    // Query untuk menambahkan pengguna baru ke dalam database
-    $sql = "INSERT INTO users (username, password, email) VALUES ('$username', '$password', '$email')";
-    if ($conn->query($sql) === TRUE) {
-        echo "User registered successfully";
+    // Query untuk memeriksa keberadaan pengguna dalam database
+    $sql = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows == 1) {
+        // Jika data ditemukan, atur sesi username dan arahkan ke halaman beranda
+        $_SESSION['username'] = $username;
+        header("Location: home_page.php");
+        exit();
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        // Jika tidak ditemukan, set login_failed to true
+        $login_failed = true;
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Page</title>
+    <title>Login Page</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -67,13 +73,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             max-width: 600px;
             color: white; /* Ensuring the text is readable on the dark background */
         }
-        .register-container {
+        .login-container {
             display: flex;
             justify-content: flex-end;
             width: 100%;
             max-width: 1200px;
         }
-        .register-form {
+        .login-form {
             width: 100%;
             max-width: 400px;
             padding: 20px;
@@ -83,33 +89,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
             margin-right: 20px; /* Added margin to the right */
         }
-        .register-form h2 {
+        .login-form h2 {
             text-align: center;
             margin-bottom: 20px;
         }
-        .register-form label {
+        .login-form label {
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
         }
-        .register-form input[type="text"],
-        .register-form input[type="password"],
-        .register-form input[type="email"] {
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
             width: 100%;
             padding: 10px;
             margin: 5px 0 20px 0;
             display: inline-block;
             border: 1px solid #ccc;
             box-sizing: border-box;
+        }
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
             background-color: #e6e6e6; /* Lighter background for input fields */
             color: #333; /* Dark text for input fields */
         }
-        .register-form input[type="text"]::placeholder,
-        .register-form input[type="password"]::placeholder,
-        .register-form input[type="email"]::placeholder {
+        .login-form input[type="text"]::placeholder,
+        .login-form input[type="password"]::placeholder {
             color: #999; /* Placeholder text color */
         }
-        .register-form button {
+        .login-form button {
             background-color: #cc181e; /* Updated button color */
             color: white;
             padding: 14px 20px;
@@ -118,10 +125,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             cursor: pointer;
             width: 100%;
         }
-        .register-form button:hover {
+        .login-form button:hover {
             opacity: 0.8;
         }
-        .register-form .error {
+        .login-form .register {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .login-form .register a {
+            color: dodgerblue;
+        }
+        .error-message {
             color: red;
             text-align: center;
             margin-bottom: 20px;
@@ -132,15 +146,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             order: -1;
             margin-bottom: 20px;
             }
-        .register-form {
+        .login-form {
             order: 1;
             }
         }
+
+
+
     </style>
 </head>
 <body>
 
-<div class="register-container">
+<div class="login-container">
     <!-- div class="left-text"> -->
     <div class="logo-container">
         <img src="yt_logo(1).png" alt="YouTube Logo" style="max-width: 100%;">
@@ -149,25 +166,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tincidunt...</p> -->
         <!-- Add more text or content here as needed -->
     </div>
-    <div class="register-form">
-        <h2>Register Your Account</h2>
+    <div class="login-form">
+        <h2>Login to Your Account</h2>
+        <?php if ($login_failed): ?>
+            <div class="error-message">Login Failed !!!</div>
+        <?php endif; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" placeholder="Input Username" required>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" placeholder="Input Password" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Input Email" required>
-            <button type="submit" name="register">Register</button>
+            <button type="submit" name="login">Login</button>
         </form>
         <div class="register">
-            <p>Already have an account? <a href="login.php">Login here</a></p>
+            <p>Don't have an account? <a href="register.php">Register here</a></p>
         </div>
     </div>
 </div>
 
 </body>
 </html>
+
 
 
 
