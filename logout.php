@@ -1,16 +1,17 @@
 <?php
-// Mulai sesi jika belum dimulai
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Mulai sesi
+session_start();
+
+// Periksa apakah sesi pengguna sudah ada
+if (isset($_SESSION['username'])) {
+    // Hapus semua variabel sesi
+    session_unset();
+
+    // Hancurkan sesi
+    session_destroy();
+
+    // Redirect ke halaman login
+    header("Location: login.php");
+    exit();
 }
-
-// Hapus semua data sesi
-session_unset();
-
-// Hancurkan sesi
-session_destroy();
-
-// Alihkan kembali ke halaman login
-header("Location: login.php");
-exit();
 ?>

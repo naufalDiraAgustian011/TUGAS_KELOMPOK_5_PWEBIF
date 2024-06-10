@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
     if ($result->num_rows == 1) {
         // Jika data ditemukan, atur sesi username dan arahkan ke halaman beranda
         $_SESSION['username'] = $username;
-        header("Location: home_page.php");
+        header("Location: ytbmerah.php");
         exit();
     } else {
         // Jika tidak ditemukan, set login_failed to true
@@ -51,14 +51,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
+    <title>YouTube Merah</title>
+    <link rel="icon" href="images/iconYT.png" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom CSS */
         body {
             font-family: Arial, sans-serif;
-            background-color: #666666; /* Updated background color */
+            background-color: rgb(33, 33, 33); /* Updated background color */
             margin: 0;
             padding: 0;
             display: flex;
@@ -160,7 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
 <div class="login-container">
     <!-- div class="left-text"> -->
     <div class="logo-container">
-        <img src="yt_logo(1).png" alt="YouTube Logo" style="max-width: 100%;">
+        <img src="images/yt_loginbg.png" alt="YouTube Logo" style="max-width: 100%;">
     </div>
         <!-- <h1>Welcome to ....,</h1>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tincidunt...</p> -->
@@ -180,13 +181,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
         </form>
         <div class="register">
             <p>Don't have an account? <a href="register.php">Register here</a></p>
+            <p>Forgot your password? <a href="forgot_password.php">Reset here</a></p>
         </div>
     </div>
 </div>
 
 </body>
 </html>
-
-
-
-

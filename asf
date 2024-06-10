@@ -1,0 +1,67 @@
+    <div class="container play-container">
+        <div class="row">
+        <div class="play-container">
+            <div class="play-video">
+                <iframe id="videoPlayer" width="100%" height="580" frameborder="0" allowfullscreen></iframe>
+                <div class="tags" id="videoTags"></div>
+                <h3 id="videoTitle">Video Title</h3>
+                <div class="play-video-info">
+                    <p id="videoInfo">Video Info</p>
+                    <div>
+                        <a href=""><img src="images/like.png" alt="">Like</a>
+                        <a href=""><img src="images/dislike.png" alt="">Dislike</a>
+                        <a href=""><img src="images/share.png" alt="">Share</a>
+                        <a href=""><img src="images/save.png" alt="">Save</a>
+                    </div>
+                </div>
+                <hr>
+                <div class="publisher">
+                    <img src="images/default.png" id="channelImage">
+                    <div>
+                        <p id="channelName">Channel Name</p>
+                        <span id="channelSubscribers">Subscribers</span>
+                    </div>
+                    <button type="button">Subscribe</button>
+                </div>
+                <div class="vid-description" id="videoDescription"></div>
+            </div>
+        </div>
+
+        <div class="side-video-list">
+            <div class="list-container">
+                <?php
+                $servername = "localhost";
+                $username = "root"; // your MySQL username
+                $password = ""; // your MySQL password
+                $dbname = "youtube_clone";
+
+                // Create connection
+                $conn = new mysqli($servername, $username, $password, $dbname);
+
+                // Check connection
+                if ($conn->connect_error) {
+                    die("Connection failed: " . $conn->connect_error);
+                }
+
+                $sql = "SELECT * FROM videos";
+                $result = $conn->query($sql);
+
+                if ($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                        echo "<div class='vid-list'>
+                        <a href='video_player.php?id={$row['id']}'><img src='{$row['thumbnail']}' class='thumbnail'></a>
+                                    <div class='vid-info'>
+                                        <a href='video_player.php?id={$row['id']}'>{$row['title']}</a>
+                                        <p>{$row['channel']}</p>
+                                        <p>{$row['views']} Views &bull; {$row['upload_time']}</p>
+                                    </div>
+                              </div>";
+                    }
+                } else {
+                    echo "No videos found";
+                }
+                $conn->close();
+                ?>
+            </div>
+        </div>
+    </div>

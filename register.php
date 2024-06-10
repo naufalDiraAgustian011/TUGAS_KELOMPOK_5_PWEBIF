@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -23,21 +24,39 @@ function test_input($data) {
     return $conn->real_escape_string($data);
 }
 
-// Tambahkan fitur penambahan akun
+$register_success = false;
+$register_failed = false;
+
+// Proses registrasi
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
     $username = test_input($_POST["username"]);
-    $password = test_input($_POST["password"]);
     $email = test_input($_POST["email"]);
+    $password = test_input($_POST["password"]);
+    $confirm_password = test_input($_POST["confirm_password"]);
+    $birthdate = test_input($_POST["birthdate"]);
 
-    // Query untuk menambahkan pengguna baru ke dalam database
-    $sql = "INSERT INTO users (username, password, email) VALUES ('$username', '$password', '$email')";
-    if ($conn->query($sql) === TRUE) {
-        echo "User registered successfully";
+    // Validasi password dan confirm password
+    if ($password == $confirm_password) {
+        // Query untuk memeriksa apakah username atau email sudah ada dalam database
+        $sql = "SELECT * FROM users WHERE username='$username' OR email='$email'";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows == 0) {
+            // Jika username dan email belum ada, tambahkan pengguna baru
+            $sql = "INSERT INTO users (username, email, password, birthdate) 
+                    VALUES ('$username', '$email', '$password', '$birthdate')";
+            if ($conn->query($sql) === TRUE) {
+                $register_success = true;
+            } else {
+                $register_failed = true;
+            }
+        } else {
+            $register_failed = true;
+        }
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        $register_failed = true;
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -45,43 +64,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Page</title>
+    <title>YouTube Merah</title>
+    <link rel="icon" href="images/iconYT.png" type="image/png">
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom CSS */
         body {
             font-family: Arial, sans-serif;
-            background-color: #666666; /* Updated background color */
+            background-color: rgb(33, 33, 33); /* Updated background color */
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            padding: 20px;
-        }
-        .left-text {
-            flex: 1;
-            padding: 20px;
-            max-width: 600px;
-            color: white; /* Ensuring the text is readable on the dark background */
-        }
-        .register-container {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-            max-width: 1200px;
         }
         .register-form {
             width: 100%;
-            max-width: 400px;
+            max-width: 800px; /* Increased max-width for wider form */
             padding: 20px;
             background-color: #ffffff; /* Contrast background for the form */
             border: 1px solid #ccc;
             border-radius: 5px;
             box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-            margin-right: 20px; /* Added margin to the right */
+            text-align: center;
         }
         .register-form h2 {
             text-align: center;
@@ -91,16 +98,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
+            text-align: left; /* Align labels to the left */
         }
         .register-form input[type="text"],
         .register-form input[type="password"],
-        .register-form input[type="email"] {
+        .register-form input[type="email"],
+        .register-form input[type="date"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Adjusted padding for better spacing */
             margin: 5px 0 20px 0;
             display: inline-block;
             border: 1px solid #ccc;
             box-sizing: border-box;
+        }
+        .register-form input[type="text"],
+        .register-form input[type="password"],
+        .register-form input[type="email"],
+        .register-form input[type="date"] {
             background-color: #e6e6e6; /* Lighter background for input fields */
             color: #333; /* Dark text for input fields */
         }
@@ -121,52 +135,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register"])) {
         .register-form button:hover {
             opacity: 0.8;
         }
-        .register-form .error {
-            color: red;
+        .register-form .login {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .register-form .login a {
+            color: dodgerblue;
+        }
+        .error-message,
+        .success-message {
             text-align: center;
             margin-bottom: 20px;
         }
-
-        @media (max-width: 768px) {
-        .logo-container {
-            order: -1;
-            margin-bottom: 20px;
-            }
-        .register-form {
-            order: 1;
-            }
+        .error-message {
+            color: red;
+        }
+        .success-message {
+            color: green;
         }
     </style>
 </head>
 <body>
 
-<div class="register-container">
-    <!-- div class="left-text"> -->
-    <div class="logo-container">
-        <img src="yt_logo(1).png" alt="YouTube Logo" style="max-width: 100%;">
-    </div>
-        <!-- <h1>Welcome to ....,</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tincidunt...</p> -->
-        <!-- Add more text or content here as needed -->
-    </div>
-    <div class="register-form">
-        <h2>Register Your Account</h2>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Input Username" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Input Password" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" placeholder="Input Email" required>
-            <button type="submit" name="register">Register</button>
-        </form>
-        <div class="register">
-            <p>Already have an account? <a href="login.php">Login here</a></p>
-        </div>
+<div class="register-form">
+    <h2>Register a New Account</h2>
+    <?php if ($register_success): ?>
+        <div class="success-message">Registration Successful! <a href="login.php">Login here</a></div>
+    <?php elseif ($register_failed): ?>
+        <div class="error-message">Registration Failed! Please try again.</div>
+    <?php endif; ?>
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="Input Username" required>
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" placeholder="Input Email Address" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Input Password" required>
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+        <label for="birthdate">Birthdate:</label>
+        <input type="date" id="birthdate" name="birthdate" required>
+        <button type="submit" name="register">Register</button>
+    </form>
+    <div class="login">
+        <p>Already have an account? <a href="login.php">Login here</a></p>
     </div>
 </div>
 
 </body>
 </html>
-
-
